@@ -17,7 +17,9 @@ const environmentFile = path.resolve(
   currentDirectory,
   `.env.${testEnvironment}`,
 );
-const environmentResult = dotenv.config({ path: environmentFile, quiet: true });
+const environmentResult = process.env.CI
+  ? { error: null }
+  : dotenv.config({ path: environmentFile, quiet: true });
 
 if (environmentResult.error) {
   throw new Error(

@@ -1,0 +1,62 @@
+name: Smoke Tests
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - develop
+      - main
+
+  push:
+    branches:
+      - develop
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Firm Admin Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      CI: true
+      TEST_ENV: dev
+      BASE_URL: ${{ secrets.DEV_BASE_URL }}
+      FIRM_ADMIN_EMAIL: ${{ secrets.DEV_FIRM_ADMIN_EMAIL }}
+      FIRM_ADMIN_PASSWORD: ${{ secrets.DEV_FIRM_ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke test
+        run: >
+          npx playwright test
+          tests/FirmAdmin/login.spec.js
+          --project=chromium
+          --grep "can successfully log in"
+          --workers=1
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-playwright-report
+          path: playwright-report/
+          retention-days: 7
