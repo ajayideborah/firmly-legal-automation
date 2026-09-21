@@ -63,7 +63,9 @@ async function reachPasswordStep(onboarding, browser, firm) {
   await onboarding.enterVerificationCode(code);
 }
 
-test('Validate Firm Admin can complete firm onboarding', async ({ page, browser }) => {
+// Tagged @nightly because it reads a real OTP out of yopmail.com. An external
+// mail service is not something a merge should ever be blocked on.
+test('Validate Firm Admin can complete firm onboarding', { tag: '@nightly' }, async ({ page, browser }) => {
   test.setTimeout(120_000);
 
   const onboarding = new FirmOnboardingPage(page);
@@ -130,7 +132,8 @@ test('Validate Firm Admin cannot verify with an incorrect OTP', async ({ page })
   ).toBeVisible();
 });
 
-test('Validate Firm Admin cannot continue with a weak password', async ({
+// Also @nightly: reaching the password step needs the OTP from yopmail.com.
+test('Validate Firm Admin cannot continue with a weak password', { tag: '@nightly' }, async ({
   page,
   browser,
 }) => {

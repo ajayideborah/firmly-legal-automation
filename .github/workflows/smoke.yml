@@ -17,6 +17,26 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
   smoke:
     name: Firm Admin Smoke
     runs-on: ubuntu-latest
@@ -42,16 +62,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate Playwright specs
+        run: npm run validate -- --project=chromium  
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run smoke test
-        run: >
-          npx playwright test
-          tests/FirmAdmin/login.spec.js
-          --project=chromium
-          --grep "can successfully log in"
-          --workers=1
+      - name: Run smoke tests
+        run: npm run test:smoke -- --project=chromium --reporter=list --reporter=html
 
       - name: Upload Playwright report
         if: always()

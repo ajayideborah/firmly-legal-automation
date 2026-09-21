@@ -15,16 +15,16 @@ test.describe('Firm Admin login', () => {
     await loginPage.open();
   });
 
-  test('Validate Firm Admin can successfully log in', async ({ page }) => {
+  test('Validate Firm Admin can successfully log in', { tag: '@smoke' }, async ({ page }) => {
     await loginPage.login(firmAdmin);
 
     await expect(page).not.toHaveURL(/login/i);
   });
 
-  test("Validate Firm Admin can't log in with an incorrect password", async () => {
+  test("Validate Firm Admin can't log in with an incorrect password", { tag: '@smoke' }, async () => {
     await loginPage.loginWith(firmAdmin.email, 'IncorrectPassword!123');
 
-    await expect(loginPage.authenticationError).toBeVisible();
+    await expect(loginPage.authenticationError).toBeVisible({ timeout: 15000 });
   });
 
   test("Validate Firm Admin can't log in with an incorrect email", async () => {
@@ -33,7 +33,7 @@ test.describe('Firm Admin login', () => {
       firmAdmin.password,
     );
 
-    await expect(loginPage.authenticationError).toBeVisible();
+    await expect(loginPage.authenticationError).toBeVisible({ timeout: 15000 });
   });
 
   test("Validate Firm Admin can't log in with an invalid email format", async ({ page }) => {

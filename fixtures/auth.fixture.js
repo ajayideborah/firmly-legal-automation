@@ -10,7 +10,7 @@ async function login(page, account) {
 }
 
 const test = base.extend({
-  accounts: async ({}, use) => {
+  accounts: async (_fixures, use) => {
     await use(accounts);
   },
 

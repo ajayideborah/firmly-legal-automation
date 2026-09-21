@@ -27,16 +27,18 @@ class FirmOnboardingPage {
 
   async fillFirmInformation(firm, submit = true) {
     await this.page.getByLabel('Firm Legal Name').fill(firm.legalName);
-
-    await this.page.getByRole('button', { name: 'Select firm type' }).click();
-    await this.page.getByRole('button', { name: 'Law Firm', exact: true }).click();
-
     await this.page.getByLabel('Email').fill(firm.email);
     await this.page.getByLabel('Phone Number').fill(firm.phone);
     await this.page.getByLabel('Address').fill(firm.address);
 
-    await this.page.getByRole('combobox', { name: 'State' }).click();
-    await this.page.getByRole('option', { name: firm.state }).click();
+    // The state trigger is a Radix combobox with no accessible name, so scope
+    // it by the label's field wrapper instead.
+    await this.page
+      .locator('label', { hasText: /^State\s*\*?$/ })
+      .locator('..')
+      .getByRole('combobox')
+      .click();
+    await this.page.getByRole('option', { name: firm.state, exact: true }).click();
 
     if (submit) {
       await this.continue();

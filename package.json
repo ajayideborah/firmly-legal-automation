@@ -2,14 +2,28 @@
   "name": "firmly-legal-automation",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+  "lint": "eslint .",
+  "lint:fix": "eslint . --fix",
+  "validate": "playwright test --list",
+  "test": "playwright test",
+  "test:smoke": "playwright test --grep @smoke",
+  "test:regression": "playwright test --grep-invert @nightly",
+  "test:nightly": "playwright test",
+  "test:headed": "playwright test --headed",
+  "test:ui": "playwright test --ui",
+  "report": "playwright show-report"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0"
   }
 }
