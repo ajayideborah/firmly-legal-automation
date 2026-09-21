@@ -13,6 +13,12 @@ on:
       - develop
       - main
 
+# A second push to the same PR cancels the in-flight run so we don't pay
+# for stale jobs.
+concurrency:
+  group: smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -78,3 +84,18 @@ jobs:
           name: smoke-playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # One required check for branch protection. Add jobs above and list them
+  # in needs: — you do not keep updating the GitHub UI.
+  ci-gate:
+    name: CI Gate
+    needs: [lint, smoke]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if lint or smoke did not succeed
+        run: |
+          echo "lint=${{ needs.lint.result }} smoke=${{ needs.smoke.result }}"
+          if [ "${{ needs.lint.result }}" != "success" ] || [ "${{ needs.smoke.result }}" != "success" ]; then
+            exit 1
+          fi
