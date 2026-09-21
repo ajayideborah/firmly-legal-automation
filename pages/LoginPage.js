@@ -4,9 +4,10 @@ class LoginPage {
     this.emailInput = page.getByLabel(/email/i);
     this.passwordInput = page.locator('#password');
     this.loginButton = page.locator('form button[type="submit"]');
+    // The failure surfaces as a toast whose only role="alert" node is an empty
+    // live-region wrapper, so match the message text instead.
     this.authenticationError = page
-      .getByRole('alert')
-      .filter({ hasText: /invalid email or password/i })
+      .getByText(/email or password you entered is incorrect|couldn.t sign you in/i)
       .first();
     this.emailRequiredError = page.getByText('Email is required.', {
       exact: true,
@@ -17,7 +18,20 @@ class LoginPage {
   }
 
   async open() {
-    await this.page.goto('/login');
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        await this.page.goto('/login');
+        return;
+      } catch (error) {
+        const isDnsError = String(error).includes('ERR_NAME_NOT_RESOLVED');
+
+        if (!isDnsError || attempt === 2) {
+          throw error;
+        }
+
+        await this.page.waitForTimeout(2000);
+      }
+    }
   }
 
   async loginWith(email, password) {
@@ -28,6 +42,9 @@ class LoginPage {
 
   async login(account) {
     await this.loginWith(account.email, account.password);
+    await this.page.waitForURL((url) => url.pathname === '/', {
+      timeout: 15_000,
+    });
     await this.page.waitForLoadState('domcontentloaded');
   }
 }
